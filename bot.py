@@ -16,7 +16,7 @@ GUILD = discord.Object(id=GUILD_ID)
 client = discord.Client(intents=discord.Intents.default())
 tree = app_commands.CommandTree(client)
 
-qbitManager:qbit.QBitManager
+qbitManager=None
 
 
 # COMMANDS
@@ -24,9 +24,26 @@ qbitManager:qbit.QBitManager
 async def echo(interaction: discord.Interaction, message:str):
     await interaction.response.send_message(message)
 
+@tree.command(name="pause", description="Pause all torrents.", guild=GUILD)
+async def pause(interaction: discord.Interaction):
+    result = qbitManager.pause_all()
+    if result:
+        await interaction.response.send_message("Paused all active torrents.")
+    else:
+        await interaction.response.send_message("Failed to pause active torrents.")
+
+@tree.command(name="resume", description="Resume all torrents.", guild=GUILD)
+async def resume(interaction: discord.Interaction):
+    result = qbitManager.resume_all()
+    if result:
+        await interaction.response.send_message("Resumed all inactive torrents.")
+    else:
+        await interaction.response.send_message("Failed to resume torrents.") 
+
 # CLIENT EVENTS
 @client.event
 async def on_ready():
+    global qbitManager
     await tree.sync(guild=GUILD)
     print("Connected to discord")
     qbitManager = qbit.QBitManager(QBIT_ADDRESS, QBIT_USER, QBIT_PASS)
