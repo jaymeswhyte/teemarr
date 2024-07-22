@@ -3,6 +3,7 @@ from discord import app_commands
 import os
 import requests
 from services import qbit, overseerr
+from ui import requestButton
 from dotenv import load_dotenv, dotenv_values
 
 load_dotenv()
@@ -47,11 +48,27 @@ async def resume(interaction: discord.Interaction):
 
 @tree.command(name="request", description="Request a Title.", guild=GUILD)
 async def request(interaction: discord.Interaction, query:str):
-    result = overseerrManager.search(query)
+    searchResults = overseerrManager.search(query)
     view = discord.ui.View()
-    button = discord.ui.Button(label="Test1")
-    view.add_item(button)
-    await interaction.response.send_message(view=view)
+    embeds = []
+    if len(searchResults)>0:
+        count = 0
+        for searchResult in searchResults:
+            count+=1
+            if count <= 10:
+                if searchResult._year != "": yearStr = f"({searchResult._year})"
+                else: yearStr = ""
+                embed = discord.Embed(
+                    title=f"{searchResult._title} {yearStr}",
+                    description=f"{searchResult._type}\n-# {searchResult._description}",
+                    color=discord.Color.dark_grey()
+                )
+                embeds.append(embed)
+
+                view.add_item(requestButton.RequestButton(searchResult))
+        await interaction.response.send_message(embeds=embeds, view=view)
+    else:
+        await interaction.response.send_message("No titles found.")
 
 # CLIENT EVENTS
 @client.event

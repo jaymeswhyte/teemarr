@@ -34,7 +34,19 @@ class OverseerrManager:
             print(results)
             queryResults = []
             for title in results['results']:
-                queryResults.append(SearchResult(title['originalTitle'], title['releaseDate'], title['overview'], title))
+                name = ""
+                date = ""
+                type = ""
+                if title['mediaType'] == "tv": 
+                    name = title['name']
+                    date = title['firstAirDate']
+                    type = "Series"
+                elif title['mediaType'] == "movie": 
+                    name = title['originalTitle']
+                    date = title['releaseDate']
+                    type = "Movie"
+                else: continue
+                queryResults.append(SearchResult(name, date, title['overview'], title, type))
             return queryResults
         else:
             print(f"Failed to search for {query}: {response.content.decode()}")
@@ -51,9 +63,11 @@ class SearchResult:
     _year = ""
     _description = ""
     rawData = None
-    def __init__(self, title, date, description, rawData) -> None:
+    _type = ""
+    def __init__(self, title, date, description, rawData, type) -> None:
         self._title = title
         self._year = str(date).split("-")[0]
         self._description = description
         self.rawData = rawData
+        self._type = type
         pass
