@@ -33,17 +33,25 @@ async def echo(interaction: discord.Interaction, message:str):
 async def pause(interaction: discord.Interaction):
     result = qbitManager.pause_all()
     if result:
-        await interaction.response.send_message("Paused all active torrents.")
+        await interaction.response.send_message(":octagonal_sign: Paused all active torrents.")
     else:
-        await interaction.response.send_message("Failed to pause active torrents.")
+        await interaction.response.send_message(":x: Failed to pause active torrents.")
 
 @tree.command(name="resume", description="Resume all torrents.", guild=GUILD)
 async def resume(interaction: discord.Interaction):
     result = qbitManager.resume_all()
     if result:
-        await interaction.response.send_message("Resumed all inactive torrents.")
+        await interaction.response.send_message(":white_check_mark: Resumed all paused torrents.")
     else:
-        await interaction.response.send_message("Failed to resume torrents.") 
+        await interaction.response.send_message(":x: Failed to resume torrents.") 
+
+@tree.command(name="request", description="Request a Title.", guild=GUILD)
+async def request(interaction: discord.Interaction, query:str):
+    result = overseerrManager.search(query)
+    view = discord.ui.View()
+    button = discord.ui.Button(label="Test1")
+    view.add_item(button)
+    await interaction.response.send_message(view=view)
 
 # CLIENT EVENTS
 @client.event

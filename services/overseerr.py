@@ -1,4 +1,6 @@
 import requests
+import json
+import urllib.parse
 
 class OverseerrManager:
     __address = ""
@@ -16,5 +18,42 @@ class OverseerrManager:
         response = self.__session.get(f"{self.__address}/api/v1/status", data=login_payload)
         if response.status_code==200:
             print(f"Connected to Overseerr @ {self.__address}")
+            self.__session.cookies.set(name="connect.sid", value=self.__key)
         else: print(f"Failed to connect to Overseer @ {self.__address}: {response.content.decode()}")
-        
+
+    def search(self, query):
+        search_payload = {
+            'query': self.sanitize(query),
+            'page':1,
+            'language':"en"
+        }
+        search_headers = {'X-Api-Key':self.__key}
+        response = self.__session.get(f"{self.__address}/api/v1/search", params=search_payload, headers=search_headers)
+        if response.status_code==200:
+            results = response.json()
+            print(results)
+            queryResults = []
+            for title in results['results']:
+                queryResults.append(SearchResult(title['originalTitle'], title['releaseDate'], title['overview'], title))
+            return queryResults
+        else:
+            print(f"Failed to search for {query}: {response.content.decode()}")
+
+    def sanitize(self, query:str)->str:
+        query = query.replace(" ", "-")
+        reservedChars = ["!", "*", "'", "(", ")", ";", ":", "@", "&", "=", "+", "$", ",", "/", "?", "%", "#", "[", "]"]
+        for char in reservedChars:
+            query = query.replace(char, "")
+        return query
+
+class SearchResult:
+    _title = ""
+    _year = ""
+    _description = ""
+    rawData = None
+    def __init__(self, title, date, description, rawData) -> None:
+        self._title = title
+        self._year = str(date).split("-")[0]
+        self._description = description
+        self.rawData = rawData
+        pass
