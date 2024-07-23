@@ -43,7 +43,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/teemarr:${{ env.RELEASE_TAG }},${{ secrets.DOCKER_USERNAME }}/teemarr:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/teemarr:${{ env.RELEASE_TAG }},${{ secrets.DOCKERHUB_USERNAME }}/teemarr:latest
 
       - name: Logout from Docker Hub
         run: docker logout
