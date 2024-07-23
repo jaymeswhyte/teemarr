@@ -1,4 +1,4 @@
-name: Update Requirements and Create Release
+name: Update Requirements
 
 on:
   push:
