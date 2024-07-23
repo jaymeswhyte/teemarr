@@ -64,8 +64,7 @@ async def request(interaction: discord.Interaction, query:str):
                     color=discord.Color.dark_grey()
                 )
                 embeds.append(embed)
-
-                view.add_item(requestButton.RequestButton(searchResult))
+                view.add_item(requestButton.RequestButton(searchResult, overseerrManager))
         await interaction.response.send_message(embeds=embeds, view=view)
     else:
         await interaction.response.send_message("No titles found.")

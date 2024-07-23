@@ -51,6 +51,22 @@ class OverseerrManager:
         else:
             print(f"Failed to search for {query}: {response.content.decode()}")
 
+    def request(self, title):
+        titleData = title.rawData
+        request_payload = {
+            'mediaType': titleData['mediaType'],
+            'mediaId': titleData['id']
+        }
+        if titleData['mediaType'] == 'tv': request_payload['seasons'] = 'all'
+        request_headers = {'X-Api-Key':self.__key}
+        response = self.__session.post(f"{self.__address}/api/v1/request", json=request_payload, headers=request_headers)
+        if response.status_code==201:
+            return True
+        else:
+            print(f"Failed to request {title._title}: {response.status_code}:{response.content.decode()}")
+            return False
+
+
     def sanitize(self, query:str)->str:
         query = query.replace(" ", "-")
         reservedChars = ["!", "*", "'", "(", ")", ";", ":", "@", "&", "=", "+", "$", ",", "/", "?", "%", "#", "[", "]"]
