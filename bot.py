@@ -2,21 +2,27 @@ import discord
 from discord import app_commands
 import os
 import requests
-from services import qbit
+from services import qbit, overseerr
+from ui import requestButton
 from dotenv import load_dotenv, dotenv_values
 
 load_dotenv()
 TOKEN = os.getenv("TOKEN")
 GUILD_ID = int(os.getenv("GUILD_ID"))
+
 QBIT_USER = os.getenv("QBIT_USER")
 QBIT_PASS = os.getenv("QBIT_PASS")
 QBIT_ADDRESS= f"http://{os.getenv("QBIT_ADDRESS")}:{os.getenv("QBIT_PORT")}"
+
+OVERSEERR_KEY = os.getenv("OVERSEERR_KEY")
+OVERSEERR_ADDRESS = f"http://{os.getenv("OVERSEERR_ADDRESS")}:{os.getenv("OVERSEERR_PORT")}"
 
 GUILD = discord.Object(id=GUILD_ID)
 client = discord.Client(intents=discord.Intents.default())
 tree = app_commands.CommandTree(client)
 
 qbitManager=None
+overseerrManager = None
 
 
 # COMMANDS
@@ -28,25 +34,50 @@ async def echo(interaction: discord.Interaction, message:str):
 async def pause(interaction: discord.Interaction):
     result = qbitManager.pause_all()
     if result:
-        await interaction.response.send_message("Paused all active torrents.")
+        await interaction.response.send_message(":octagonal_sign: Paused all active torrents.")
     else:
-        await interaction.response.send_message("Failed to pause active torrents.")
+        await interaction.response.send_message(":x: Failed to pause active torrents.")
 
 @tree.command(name="resume", description="Resume all torrents.", guild=GUILD)
 async def resume(interaction: discord.Interaction):
     result = qbitManager.resume_all()
     if result:
-        await interaction.response.send_message("Resumed all inactive torrents.")
+        await interaction.response.send_message(":white_check_mark: Resumed all paused torrents.")
     else:
-        await interaction.response.send_message("Failed to resume torrents.") 
+        await interaction.response.send_message(":x: Failed to resume torrents.") 
+
+@tree.command(name="request", description="Request a Title.", guild=GUILD)
+async def request(interaction: discord.Interaction, query:str):
+    searchResults = overseerrManager.search(query)
+    view = discord.ui.View()
+    embeds = []
+    if len(searchResults)>0:
+        count = 0
+        for searchResult in searchResults:
+            count+=1
+            if count <= 10:
+                if searchResult._year != "": yearStr = f"({searchResult._year})"
+                else: yearStr = ""
+                embed = discord.Embed(
+                    title=f"{searchResult._title} {yearStr}",
+                    description=f"{searchResult._type}\n-# {searchResult._description}",
+                    color=discord.Color.dark_grey()
+                )
+                embeds.append(embed)
+                view.add_item(requestButton.RequestButton(searchResult, overseerrManager))
+        await interaction.response.send_message(embeds=embeds, view=view)
+    else:
+        await interaction.response.send_message("No titles found.")
 
 # CLIENT EVENTS
 @client.event
 async def on_ready():
     global qbitManager
+    global overseerrManager
     await tree.sync(guild=GUILD)
     print("Connected to discord")
     qbitManager = qbit.QBitManager(QBIT_ADDRESS, QBIT_USER, QBIT_PASS)
+    overseerrManager = overseerr.OverseerrManager(OVERSEERR_ADDRESS, OVERSEERR_KEY)
 
 session = requests.Session()
 client.run(TOKEN)
