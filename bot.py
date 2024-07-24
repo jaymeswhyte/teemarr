@@ -12,10 +12,10 @@ GUILD_ID = int(os.environ["GUILD_ID"])
 
 QBIT_USER = os.environ["QBIT_USER"]
 QBIT_PASS = os.environ["QBIT_PASS"]
-QBIT_ADDRESS= f"http://{os.environ["QBIT_ADDRESS"]}:{os.environ["QBIT_PORT"]}"
+QBIT_ADDRESS= f"http://{os.environ['QBIT_ADDRESS']}:{os.environ['QBIT_PORT']}"
 
 OVERSEERR_KEY = os.environ["OVERSEERR_KEY"]
-OVERSEERR_ADDRESS = f"http://{os.environ["OVERSEERR_ADDRESS"]}:{os.environ["OVERSEERR_PORT"]}"
+OVERSEERR_ADDRESS = f"http://{os.environ['OVERSEERR_ADDRESS']}:{os.environ['OVERSEERR_PORT']}"
 
 GUILD = discord.Object(id=GUILD_ID)
 client = discord.Client(intents=discord.Intents.default())
