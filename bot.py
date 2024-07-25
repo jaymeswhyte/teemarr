@@ -19,7 +19,7 @@ QBIT_ADDRESS= f"http://{os.environ['QBIT_ADDRESS']}:{os.environ['QBIT_PORT']}"
 OVERSEERR_KEY = os.environ["OVERSEERR_KEY"]
 OVERSEERR_ADDRESS = f"http://{os.environ['OVERSEERR_ADDRESS']}:{os.environ['OVERSEERR_PORT']}"
 
-GUILD = discord.Object(id=GUILD_ID)
+GUILD = discord.Guild(id=GUILD_ID)
 client = discord.Client(intents=discord.Intents.default())
 tree = app_commands.CommandTree(client)
 
@@ -86,7 +86,7 @@ async def on_ready():
     print("Connected to discord")
     qbitManager = qbit.QBitManager(QBIT_ADDRESS, QBIT_USER, QBIT_PASS)
     overseerrManager = overseerr.OverseerrManager(OVERSEERR_ADDRESS, OVERSEERR_KEY)
-    statusChannel = discord.utils.get(client.get_all_channels(), name="status")
+    statusChannel = discord.utils.get(GUILD.channels, name="status")
     embeds = []
     with open('version.txt', 'r') as file:
         version = file.readline()
