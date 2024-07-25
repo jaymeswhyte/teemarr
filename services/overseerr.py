@@ -1,6 +1,4 @@
 import requests
-import json
-import urllib.parse
 
 class OverseerrManager:
     __address = ""
@@ -31,7 +29,6 @@ class OverseerrManager:
         response = self.__session.get(f"{self.__address}/api/v1/search", params=search_payload, headers=search_headers)
         if response.status_code==200:
             results = response.json()
-            print(results)
             queryResults = []
             for title in results['results']:
                 name = ""

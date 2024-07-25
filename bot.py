@@ -4,6 +4,8 @@ import os
 import requests
 from services import qbit, overseerr
 from ui import requestButton
+from components.config import Config
+from utils.TeemoUtilities import *
 from dotenv import load_dotenv, dotenv_values
 
 load_dotenv()
@@ -25,6 +27,7 @@ qbitManager=None
 overseerrManager = None
 
 statusChannel = None
+configuration = None
 
 # COMMANDS
 @tree.command( name="echo", description="Echo message", guild = GUILD)
@@ -73,16 +76,28 @@ async def request(interaction: discord.Interaction, query:str):
 # CLIENT EVENTS
 @client.event
 async def on_ready():
-    global qbitManager, overseerrManager, statusChannel
+    global qbitManager, overseerrManager, statusChannel, configuration
     await tree.sync(guild=GUILD)
     print("Connected to discord")
     qbitManager = qbit.QBitManager(QBIT_ADDRESS, QBIT_USER, QBIT_PASS)
     overseerrManager = overseerr.OverseerrManager(OVERSEERR_ADDRESS, OVERSEERR_KEY)
     statusChannel = discord.utils.get(client.get_all_channels(), name="status")
-    file = open('version.txt')
-    version = file.readline()
-    file.close()
-    await statusChannel.send(f"Back Online! Running Teemarr version {version}.")
+    embeds = []
+    with open('version.txt', 'r') as file:
+        version = file.readline()
+        file.close()
+    configuration = Config(path='config')
+    if configuration.is_older_than(version):
+        configuration.version = version
+        configuration.write_to_file('config')
+        notes = get_release_notes(configuration.version)
+        embed = discord.Embed(
+                    title=f"New release patch notes: v{configuration.version}",
+                    description=notes,
+                    color=discord.Color.dark_grey()
+                )
+        embeds.append(embed)
+    await statusChannel.send(f"Back Online! Running Teemarr v{configuration.version}.", embeds=embeds)
 
 session = requests.Session()
 client.run(TOKEN)
