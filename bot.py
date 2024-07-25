@@ -24,6 +24,7 @@ tree = app_commands.CommandTree(client)
 qbitManager=None
 overseerrManager = None
 
+statusChannel = None
 
 # COMMANDS
 @tree.command( name="echo", description="Echo message", guild = GUILD)
@@ -72,12 +73,16 @@ async def request(interaction: discord.Interaction, query:str):
 # CLIENT EVENTS
 @client.event
 async def on_ready():
-    global qbitManager
-    global overseerrManager
+    global qbitManager, overseerrManager, statusChannel
     await tree.sync(guild=GUILD)
     print("Connected to discord")
     qbitManager = qbit.QBitManager(QBIT_ADDRESS, QBIT_USER, QBIT_PASS)
     overseerrManager = overseerr.OverseerrManager(OVERSEERR_ADDRESS, OVERSEERR_KEY)
+    statusChannel = discord.utils.get(client.get_all_channels(), name="status")
+    file = open('version.txt')
+    version = file.readline()
+    file.close()
+    await statusChannel.send(f"Back Online! Running Teemarr version {version}.")
 
 session = requests.Session()
 client.run(TOKEN)
