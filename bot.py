@@ -19,7 +19,7 @@ QBIT_ADDRESS= f"http://{os.environ['QBIT_ADDRESS']}:{os.environ['QBIT_PORT']}"
 OVERSEERR_KEY = os.environ["OVERSEERR_KEY"]
 OVERSEERR_ADDRESS = f"http://{os.environ['OVERSEERR_ADDRESS']}:{os.environ['OVERSEERR_PORT']}"
 
-GUILD = discord.Guild(id=GUILD_ID)
+GUILD = discord.Object(id=GUILD_ID)
 client = discord.Client(intents=discord.Intents.default())
 tree = app_commands.CommandTree(client)
 

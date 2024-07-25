@@ -9,6 +9,8 @@ config/
 # C extensions
 *.so
 
+/config
+
 # Distribution / packaging
 .Python
 build/
