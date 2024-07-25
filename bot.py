@@ -3,7 +3,7 @@ from discord import app_commands
 import os
 import requests
 from services import qbit, overseerr
-from ui import requestButton
+from ui import requestButton, cancelButton
 from components.config import Config
 from utils.TeemoUtilities import *
 from dotenv import load_dotenv, dotenv_values
@@ -59,7 +59,7 @@ async def request(interaction: discord.Interaction, query:str):
         count = 0
         for searchResult in searchResults:
             count+=1
-            if count <= 10:
+            if count <= 9:
                 if searchResult._year != "": yearStr = f"({searchResult._year})"
                 else: yearStr = ""
                 embed = discord.Embed(
@@ -69,6 +69,7 @@ async def request(interaction: discord.Interaction, query:str):
                 )
                 embeds.append(embed)
                 view.add_item(requestButton.RequestButton(searchResult, overseerrManager))
+        view.add_item(cancelButton.CancelButton())
         await interaction.response.send_message(embeds=embeds, view=view)
     else:
         await interaction.response.send_message("No titles found.")

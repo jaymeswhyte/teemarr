@@ -20,6 +20,7 @@ async def handle_request(interaction: discord.Interaction, item: SearchResult, m
     if item._year != "": yearStr = f" ({item._year})"
     else: yearStr = ""
     if requestResult:
+        await interaction.message.delete()
         await interaction.response.send_message(f"Requested: {item._title}{yearStr}.")
     else:
         await interaction.response.send_message(f"Failed to request {item._title}{yearStr}.")
