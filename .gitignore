@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Mounted volumes
+config/
+
 # C extensions
 *.so
 
