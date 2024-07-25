@@ -29,6 +29,10 @@ overseerrManager = None
 statusChannel = None
 configuration = None
 
+configPath = None
+if os.path.exists('/config'): configPath = '/config'
+else: configPath = 'config'
+
 # COMMANDS
 @tree.command( name="echo", description="Echo message", guild = GUILD)
 async def echo(interaction: discord.Interaction, message:str):
@@ -87,10 +91,10 @@ async def on_ready():
     with open('version.txt', 'r') as file:
         version = file.readline()
         file.close()
-    configuration = Config(path='config')
+    configuration = Config(configPath)
     if configuration.is_older_than(version):
         configuration.version = version
-        configuration.write_to_file('config')
+        configuration.write_to_file(configPath)
         notes = get_release_notes(configuration.version)
         embed = discord.Embed(
                     title=f"New release patch notes: v{configuration.version}",
