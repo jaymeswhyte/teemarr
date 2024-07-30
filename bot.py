@@ -1,13 +1,14 @@
 import discord
 from discord import app_commands
 import os
-import requests
 from services import qbit, overseerr
 from ui import requestButton, cancelButton
 from components.config import Config
 from utils.TeemoUtilities import *
-from dotenv import load_dotenv, dotenv_values
+from dotenv import load_dotenv
+import pytz
 
+# Environment variables
 load_dotenv()
 TOKEN = os.environ["TOKEN"]
 GUILD_ID = int(os.environ["GUILD_ID"])
@@ -19,6 +20,11 @@ QBIT_ADDRESS= f"http://{os.environ['QBIT_ADDRESS']}:{os.environ['QBIT_PORT']}"
 OVERSEERR_KEY = os.environ["OVERSEERR_KEY"]
 OVERSEERR_ADDRESS = f"http://{os.environ['OVERSEERR_ADDRESS']}:{os.environ['OVERSEERR_PORT']}"
 
+TZ_NAME = os.environ['TZ']
+if not TZ_NAME:
+    TZ_NAME = 'UTC'
+timezone = pytz.timezone(TZ_NAME)
+
 client = discord.Client(intents=discord.Intents.default())
 tree = app_commands.CommandTree(client)
 
@@ -28,6 +34,7 @@ overseerrManager = None
 guild = None
 statusChannel = None
 configuration = None
+
 
 configPath = None
 if os.path.exists('/config'): configPath = '/config'
