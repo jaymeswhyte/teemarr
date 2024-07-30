@@ -3,7 +3,7 @@ from discord import app_commands
 import os
 import requests
 from services import qbit, overseerr
-from ui import requestButton, cancelButton
+from ui import requestButton, cancelButton, requestView
 from components.config import Config
 from utils.TeemoUtilities import *
 from dotenv import load_dotenv, dotenv_values
@@ -58,7 +58,7 @@ async def resume(interaction: discord.Interaction):
 @tree.command(name="request", description="Request a Title.", guild=GUILD_OBJECT)
 async def request(interaction: discord.Interaction, query:str):
     searchResults = overseerrManager.search(query)
-    view = discord.ui.View(timeout=180)
+    view = requestView.RequestView(timeout=60)
     embeds = []
     if len(searchResults)>0:
         count = 0
@@ -76,6 +76,7 @@ async def request(interaction: discord.Interaction, query:str):
                 view.add_item(requestButton.RequestButton(searchResult, overseerrManager))
         view.add_item(cancelButton.CancelButton())
         await interaction.response.send_message(embeds=embeds, view=view)
+        view.message = await interaction.original_response()
     else:
         await interaction.response.send_message("No titles found.")
 
