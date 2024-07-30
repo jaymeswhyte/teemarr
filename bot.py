@@ -11,6 +11,7 @@ from dotenv import load_dotenv, dotenv_values
 load_dotenv()
 TOKEN = os.environ["TOKEN"]
 GUILD_ID = int(os.environ["GUILD_ID"])
+GUILD_OBJECT = discord.Object(id=GUILD_ID)
 
 QBIT_USER = os.environ["QBIT_USER"]
 QBIT_PASS = os.environ["QBIT_PASS"]
@@ -34,7 +35,7 @@ if os.path.exists('/config'): configPath = '/config'
 else: configPath = 'config'
 
 # COMMANDS
-@tree.command( name="echo", description="Echo message", guild = guild)
+@tree.command( name="echo", description="Echo message", guild = GUILD_OBJECT)
 async def echo(interaction: discord.Interaction, message:str):
     await interaction.response.send_message(message)
 
@@ -46,7 +47,7 @@ async def pause(interaction: discord.Interaction):
     else:
         await interaction.response.send_message(":x: Failed to pause active torrents.")
 
-@tree.command(name="resume", description="Resume all torrents.", guild=guild)
+@tree.command(name="resume", description="Resume all torrents.", guild=GUILD_OBJECT)
 async def resume(interaction: discord.Interaction):
     result = qbitManager.resume_all()
     if result:
@@ -54,10 +55,10 @@ async def resume(interaction: discord.Interaction):
     else:
         await interaction.response.send_message(":x: Failed to resume torrents.") 
 
-@tree.command(name="request", description="Request a Title.", guild=guild)
+@tree.command(name="request", description="Request a Title.", guild=GUILD_OBJECT)
 async def request(interaction: discord.Interaction, query:str):
     searchResults = overseerrManager.search(query)
-    view = discord.ui.View()
+    view = discord.ui.View(timeout=180)
     embeds = []
     if len(searchResults)>0:
         count = 0
