@@ -19,13 +19,13 @@ QBIT_ADDRESS= f"http://{os.environ['QBIT_ADDRESS']}:{os.environ['QBIT_PORT']}"
 OVERSEERR_KEY = os.environ["OVERSEERR_KEY"]
 OVERSEERR_ADDRESS = f"http://{os.environ['OVERSEERR_ADDRESS']}:{os.environ['OVERSEERR_PORT']}"
 
-GUILD = discord.Object(id=GUILD_ID)
 client = discord.Client(intents=discord.Intents.default())
 tree = app_commands.CommandTree(client)
 
 qbitManager=None
 overseerrManager = None
 
+guild = None
 statusChannel = None
 configuration = None
 
@@ -34,11 +34,11 @@ if os.path.exists('/config'): configPath = '/config'
 else: configPath = 'config'
 
 # COMMANDS
-@tree.command( name="echo", description="Echo message", guild = GUILD)
+@tree.command( name="echo", description="Echo message", guild = guild)
 async def echo(interaction: discord.Interaction, message:str):
     await interaction.response.send_message(message)
 
-@tree.command(name="pause", description="Pause all torrents.", guild=GUILD)
+@tree.command(name="pause", description="Pause all torrents.", guild=guild)
 async def pause(interaction: discord.Interaction):
     result = qbitManager.pause_all()
     if result:
@@ -46,7 +46,7 @@ async def pause(interaction: discord.Interaction):
     else:
         await interaction.response.send_message(":x: Failed to pause active torrents.")
 
-@tree.command(name="resume", description="Resume all torrents.", guild=GUILD)
+@tree.command(name="resume", description="Resume all torrents.", guild=guild)
 async def resume(interaction: discord.Interaction):
     result = qbitManager.resume_all()
     if result:
@@ -54,7 +54,7 @@ async def resume(interaction: discord.Interaction):
     else:
         await interaction.response.send_message(":x: Failed to resume torrents.") 
 
-@tree.command(name="request", description="Request a Title.", guild=GUILD)
+@tree.command(name="request", description="Request a Title.", guild=guild)
 async def request(interaction: discord.Interaction, query:str):
     searchResults = overseerrManager.search(query)
     view = discord.ui.View()
@@ -78,15 +78,20 @@ async def request(interaction: discord.Interaction, query:str):
     else:
         await interaction.response.send_message("No titles found.")
 
+
+
+
 # CLIENT EVENTS
 @client.event
 async def on_ready():
-    global qbitManager, overseerrManager, statusChannel, configuration
-    await tree.sync(guild=GUILD)
+    global qbitManager, overseerrManager, statusChannel, configuration, guild
+    guild = await client.fetch_guild(GUILD_ID)
+    await tree.sync(guild=guild)
+    channels = await guild.fetch_channels()
     print("Connected to discord")
     qbitManager = qbit.QBitManager(QBIT_ADDRESS, QBIT_USER, QBIT_PASS)
     overseerrManager = overseerr.OverseerrManager(OVERSEERR_ADDRESS, OVERSEERR_KEY)
-    statusChannel = discord.utils.get(GUILD.channels, name="status")
+    statusChannel = discord.utils.get(channels, name="status")
     embeds = []
     with open('version.txt', 'r') as file:
         version = file.readline()
@@ -102,7 +107,8 @@ async def on_ready():
                     color=discord.Color.dark_grey()
                 )
         embeds.append(embed)
-    await statusChannel.send(f"Back Online! Running Teemarr v{configuration.version}.", embeds=embeds)
+    if statusChannel == None: await guild.channels[0].send(f"Back Online! Running Teemarr v{configuration.version}.", embeds=embeds)
+    else: await statusChannel.send(f"Back Online! Running Teemarr v{configuration.version}.", embeds=embeds)
 
-session = requests.Session()
+
 client.run(TOKEN)
