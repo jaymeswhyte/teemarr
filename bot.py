@@ -39,7 +39,7 @@ else: configPath = 'config'
 async def echo(interaction: discord.Interaction, message:str):
     await interaction.response.send_message(message)
 
-@tree.command(name="pause", description="Pause all torrents.", guild=guild)
+@tree.command(name="pause", description="Pause all torrents.", guild = GUILD_OBJECT)
 async def pause(interaction: discord.Interaction):
     result = qbitManager.pause_all()
     if result:
