@@ -1,5 +1,7 @@
 import discord
 from discord import app_commands
+from discord.ext import commands, tasks
+from datetime import datetime, time
 import os
 from services import qbit, overseerr
 from ui import requestButton, cancelButton
@@ -24,6 +26,8 @@ TZ_NAME = os.environ['TZ']
 if not TZ_NAME:
     TZ_NAME = 'UTC'
 timezone = pytz.timezone(TZ_NAME)
+nightTime = time(hour=21, minute=45, tzinfo=timezone)
+dayTime = time(hour=9, minute=0, tzinfo=timezone)
 
 client = discord.Client(intents=discord.Intents.default())
 tree = app_commands.CommandTree(client)
@@ -99,6 +103,7 @@ async def on_ready():
     qbitManager = qbit.QBitManager(QBIT_ADDRESS, QBIT_USER, QBIT_PASS)
     overseerrManager = overseerr.OverseerrManager(OVERSEERR_ADDRESS, OVERSEERR_KEY)
     statusChannel = discord.utils.get(channels, name="status")
+    if not statusChannel: statusChannel = guild.channels[0]
     embeds = []
     with open('version.txt', 'r') as file:
         version = file.readline()
@@ -114,8 +119,19 @@ async def on_ready():
                     color=discord.Color.dark_grey()
                 )
         embeds.append(embed)
-    if statusChannel == None: await guild.channels[0].send(f"Back Online! Running Teemarr v{configuration.version}.", embeds=embeds)
-    else: await statusChannel.send(f"Back Online! Running Teemarr v{configuration.version}.", embeds=embeds)
+    await statusChannel.send(f"Back Online! Running Teemarr v{configuration.version}.", embeds=embeds)
+    print(f"TZ: {timezone}\tTime:{datetime.now(timezone)}\tNight:{nightTime}")
+    overnight_resume.start()
+    
 
+@tasks.loop(time=nightTime)
+async def overnight_resume():
+    print("Night time")
+    result = qbitManager.resume_all()
+
+    if result:
+        await statusChannel.send(f"Downloads are being resumed for the night. Sleep well!")
+    else:
+        await statusChannel.send(f"Goodnight, I couldn't resume downloads for the night.")
 
 client.run(TOKEN)
