@@ -1,4 +1,5 @@
 from discord.ui import View
+import logging
 
 class RequestView(View):
     _message = None
@@ -6,9 +7,12 @@ class RequestView(View):
         super().__init__(*items, timeout=timeout)
 
     async def on_timeout(self):
-        self.clear_items()
         # This will update the original message to disable the buttons
-        await self._message.edit(content="Request timed out.", view=self, embeds=[])
+        try:
+            self.clear_items()
+            await self._message.edit(content="Request timed out.", view=self, embeds=[])
+        except Exception as e:
+            logging.error(f"Failed to remove embeds from timed-out message: {e}")
 
     @property
     def message(self):
