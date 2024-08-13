@@ -28,7 +28,7 @@ if not TZ_NAME:
     TZ_NAME = 'UTC'
 timezone = pytz.timezone(TZ_NAME)
 local_tz = datetime.now().astimezone().tzinfo
-nightTime = time(hour=18, minute=17, tzinfo=local_tz)
+nightTime = time(hour=1, minute=0, tzinfo=local_tz)
 dayTime = time(hour=9, minute=0, tzinfo=local_tz)
 
 client = discord.Client(intents=discord.Intents.default())
