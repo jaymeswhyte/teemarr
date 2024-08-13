@@ -92,6 +92,20 @@ async def request(interaction: discord.Interaction, query:str):
     else:
         await interaction.response.send_message("No titles found.")
 
+@tree.command(name="overnights", description="Turn overnight values ON or OFF", guild=GUILD_OBJECT)
+async def overnights(interaction: discord.Interaction, setting:str):
+    global configuration
+    oldSetting = configuration.overnightDownloads
+    setting = setting.upper() # Formatting
+    if setting == "ON" or setting == "TRUE":
+        configuration.overnightDownloads = True
+        await interaction.response.send_message("Overnight Downloads are now ON.")
+    elif setting == "OFF" or setting == "FALSE":
+        configuration.overnightDownloads = False
+        await interaction.response.send_message("Overnight Downloads are now ON.")
+
+    if configuration.overnightDownloads != oldSetting: 
+        configuration.write_to_file(configPath) # Only bother with write operation if this value is different
 
 
 
@@ -130,18 +144,22 @@ async def on_ready():
 
 @tasks.loop(time=nightTime)
 async def overnight_resume():
-    result = qbitManager.resume_all()
-    if result:
-        await statusChannel.send(f"Downloads are being resumed for the night. Sleep well!")
-    else:
-        await statusChannel.send(f"Goodnight, I couldn't resume downloads for the night.")
+    global configuration
+    if configuration.overnightDownloads:
+        result = qbitManager.resume_all()
+        if result:
+            await statusChannel.send(f"Goodnight! Downloads are being resumed for the night. Sleep well!")
+        else:
+            await statusChannel.send(f"Goodnight! I couldn't resume downloads for the night.")
 
 @tasks.loop(time=dayTime)
 async def daytime_pause():
-    result = qbitManager.pause_all()
-    if result:
-        await statusChannel.send(f"Good Morning! Downloads have been paused.")
-    else:
-        await statusChannel.send(f"Good Morning! I couldn't pause downloads for the day.")
+    global configuration
+    if configuration.overnightDownloads:
+        result = qbitManager.pause_all()
+        if result:
+            await statusChannel.send(f"Good Morning! Downloads have been paused.")
+        else:
+            await statusChannel.send(f"Good Morning! I couldn't pause downloads for the day.")
 
 client.run(TOKEN)
