@@ -1,4 +1,5 @@
 import requests
+import logging
 
 class OverseerrManager:
     __address = ""
@@ -12,56 +13,65 @@ class OverseerrManager:
         pass
 
     def overseerr_login(self):
-        login_payload = { 'X-Api-Key':self.__key }
-        response = self.__session.get(f"{self.__address}/api/v1/status", data=login_payload)
-        if response.status_code==200:
-            print(f"Connected to Overseerr @ {self.__address}")
-            self.__session.cookies.set(name="connect.sid", value=self.__key)
-        else: print(f"Failed to connect to Overseer @ {self.__address}: {response.content.decode()}")
+        try:
+            login_payload = { 'X-Api-Key':self.__key }
+            response = self.__session.get(f"{self.__address}/api/v1/status", data=login_payload)
+            if response.status_code==200:
+                logging.info(f"Connected to Overseerr @ {self.__address}")
+                self.__session.cookies.set(name="connect.sid", value=self.__key)
+            else: logging.warning(f"Failed to connect to Overseer @ {self.__address}: {response.content.decode()}")
+        except Exception as e:
+            logging.error(f"Exception while connecting to Overseerr: {e}")
 
     def search(self, query):
-        search_payload = {
-            'query': self.sanitize(query),
-            'page':1,
-            'language':"en"
-        }
-        search_headers = {'X-Api-Key':self.__key}
-        response = self.__session.get(f"{self.__address}/api/v1/search", params=search_payload, headers=search_headers)
-        if response.status_code==200:
-            results = response.json()
-            queryResults = []
-            for title in results['results']:
-                name = ""
-                date = ""
-                type = ""
-                if title['mediaType'] == "tv": 
-                    name = title['name']
-                    date = title['firstAirDate']
-                    type = "Series"
-                elif title['mediaType'] == "movie": 
-                    name = title['originalTitle']
-                    date = title['releaseDate']
-                    type = "Movie"
-                else: continue
-                queryResults.append(SearchResult(name, date, title['overview'], title, type))
-            return queryResults
-        else:
-            print(f"Failed to search for {query}: {response.content.decode()}")
+        try:
+            search_payload = {
+                'query': self.sanitize(query),
+                'page':1,
+                'language':"en"
+            }
+            search_headers = {'X-Api-Key':self.__key}
+            response = self.__session.get(f"{self.__address}/api/v1/search", params=search_payload, headers=search_headers)
+            if response.status_code==200:
+                results = response.json()
+                queryResults = []
+                for title in results['results']:
+                    name = ""
+                    date = ""
+                    type = ""
+                    if title['mediaType'] == "tv": 
+                        name = title['name']
+                        date = title['firstAirDate']
+                        type = "Series"
+                    elif title['mediaType'] == "movie": 
+                        name = title['originalTitle']
+                        date = title['releaseDate']
+                        type = "Movie"
+                    else: continue
+                    queryResults.append(SearchResult(name, date, title['overview'], title, type))
+                return queryResults
+            else:
+                logging.warning(f"Failed to search for {query}: {response.content.decode()}")
+        except Exception as e:
+            logging.error(f"Exception while search querying Overseerr: {e}")
 
     def request(self, title):
-        titleData = title.rawData
-        request_payload = {
-            'mediaType': titleData['mediaType'],
-            'mediaId': titleData['id']
-        }
-        if titleData['mediaType'] == 'tv': request_payload['seasons'] = 'all'
-        request_headers = {'X-Api-Key':self.__key}
-        response = self.__session.post(f"{self.__address}/api/v1/request", json=request_payload, headers=request_headers)
-        if response.status_code==201:
-            return True
-        else:
-            print(f"Failed to request {title._title}: {response.status_code}:{response.content.decode()}")
-            return False
+        try:
+            titleData = title.rawData
+            request_payload = {
+                'mediaType': titleData['mediaType'],
+                'mediaId': titleData['id']
+            }
+            if titleData['mediaType'] == 'tv': request_payload['seasons'] = 'all'
+            request_headers = {'X-Api-Key':self.__key}
+            response = self.__session.post(f"{self.__address}/api/v1/request", json=request_payload, headers=request_headers)
+            if response.status_code==201:
+                return True
+            else:
+                logging.warning(f"Failed to request {title._title}: {response.status_code}:{response.content.decode()}")
+                return False
+        except Exception as e:
+            logging.error(f"Exception while creating an Overseerr request: {e}")
 
 
     def sanitize(self, query:str)->str:

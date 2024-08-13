@@ -1,19 +1,29 @@
 import os
+import json
 
 class Config:
     _version = "0.0.0"
+    _overnightDownloads = True
     def __init__(self, path:str) -> None:
         if os.path.exists(f"{path}/config.txt"): 
             with open(f"{path}/config.txt", 'r') as textFile:
-                version = textFile.readline()
-                self._version = version
+                try: jsonRead = json.loads(textFile.read())
+                except Exception: 
+                    # An Exception may be caused when reading from config files with the old plain version num format
+                    # In this case just create a new json object with that version num
+                    versionNum = textFile.readline()
+                    jsonRead = json.loads(json.dumps({"version":versionNum, "overnight_downloads":self._overnightDownloads}))
                 textFile.close()
+            self._version = jsonRead.get("version", self._version)
+            self._overnightDownloads = jsonRead.get("overnight_downloads", self._overnightDownloads)  
         else: self.write_to_file(path)
         pass
 
     def write_to_file(self, path:str):
+        selfDict = {"version":self._version, "overnight_downloads":self._overnightDownloads}
+        selfJson = json.dumps(selfDict)
         with open(f"{path}/config.txt", 'w+') as textFile:
-            textFile.write(self._version)
+            textFile.write(selfJson)
             textFile.close()
 
     def is_older_than(self, version:str):
@@ -30,3 +40,10 @@ class Config:
     @version.setter
     def version(self, newVersion):
         self._version = newVersion
+
+    @property
+    def overnightDownloads(self):
+        return self._overnightDownloads
+    @overnightDownloads.setter
+    def overnightDownloads(self, newVal):
+        self._overnightDownloads = newVal
