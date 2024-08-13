@@ -53,6 +53,7 @@ async def echo(interaction: discord.Interaction, message:str):
 
 @tree.command(name="pause", description="Pause all torrents.", guild = GUILD_OBJECT)
 async def pause(interaction: discord.Interaction):
+    global qbitManager
     result = qbitManager.pause_all()
     if result:
         await interaction.response.send_message(":octagonal_sign: Paused all active torrents.")
@@ -61,6 +62,7 @@ async def pause(interaction: discord.Interaction):
 
 @tree.command(name="resume", description="Resume all torrents.", guild=GUILD_OBJECT)
 async def resume(interaction: discord.Interaction):
+    global qbitManager
     result = qbitManager.resume_all()
     if result:
         await interaction.response.send_message(":white_check_mark: Resumed all paused torrents.")
@@ -69,6 +71,7 @@ async def resume(interaction: discord.Interaction):
 
 @tree.command(name="request", description="Request a Title.", guild=GUILD_OBJECT)
 async def request(interaction: discord.Interaction, query:str):
+    global overseerrManager
     searchResults = overseerrManager.search(query)
     view = requestView.RequestView(timeout=60)
     embeds = []
@@ -144,7 +147,7 @@ async def on_ready():
 
 @tasks.loop(time=nightTime)
 async def overnight_resume():
-    global configuration
+    global configuration, qbitManager
     if configuration.overnightDownloads:
         result = qbitManager.resume_all()
         if result:
@@ -154,7 +157,7 @@ async def overnight_resume():
 
 @tasks.loop(time=dayTime)
 async def daytime_pause():
-    global configuration
+    global configuration, qbitManager
     if configuration.overnightDownloads:
         result = qbitManager.pause_all()
         if result:
