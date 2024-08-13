@@ -102,7 +102,7 @@ async def overnights(interaction: discord.Interaction, setting:str):
         await interaction.response.send_message("Overnight Downloads are now ON.")
     elif setting == "OFF" or setting == "FALSE":
         configuration.overnightDownloads = False
-        await interaction.response.send_message("Overnight Downloads are now ON.")
+        await interaction.response.send_message("Overnight Downloads are now OFF.")
 
     if configuration.overnightDownloads != oldSetting: 
         configuration.write_to_file(configPath) # Only bother with write operation if this value is different
