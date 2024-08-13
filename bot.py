@@ -125,16 +125,23 @@ async def on_ready():
     await statusChannel.send(f"Back Online! Running Teemarr v{configuration.version}.", embeds=embeds)
     print(f"TZ: {timezone}\tTime:{datetime.now(timezone)}\tNight:{nightTime}")
     overnight_resume.start()
+    daytime_pause.start()
 
 
 @tasks.loop(time=nightTime)
 async def overnight_resume():
-    print("Night time")
     result = qbitManager.resume_all()
-
     if result:
         await statusChannel.send(f"Downloads are being resumed for the night. Sleep well!")
     else:
         await statusChannel.send(f"Goodnight, I couldn't resume downloads for the night.")
+
+@tasks.loop(time=dayTime)
+async def daytime_pause():
+    result = qbitManager.pause_all()
+    if result:
+        await statusChannel.send(f"Good Morning! Downloads have been paused.")
+    else:
+        await statusChannel.send(f"Good Morning! I couldn't pause downloads for the day.")
 
 client.run(TOKEN)
