@@ -11,6 +11,7 @@ class Config:
                 except Exception: 
                     # An Exception may be caused when reading from config files with the old plain version num format
                     # In this case just create a new json object with that version num
+                    textFile.seek(0)
                     versionNum = textFile.readline()
                     jsonRead = json.loads(json.dumps({"version":versionNum, "overnight_downloads":self._overnightDownloads}))
                 textFile.close()
