@@ -31,6 +31,7 @@ class QBitManager:
 
     def pause_all(self):
         try:
+            self.qbit_login() #QBitTorrent seems to arbitrarily timeout issued tokens, so this is a bruteforce solution - validate every time a command is sent
             pause_payload = {'hashes':'all'}
             response = self.__session.post(f"{self.__address}/api/v2/torrents/pause", data=pause_payload, cookies=self.__cookie)
             if response.status_code != 200: 
@@ -42,6 +43,7 @@ class QBitManager:
 
     def resume_all(self):
         try:
+            self.qbit_login() #QBitTorrent seems to arbitrarily timeout issued tokens, so this is a bruteforce solution - validate every time
             resume_payload = {'hashes':'all'}
             response = self.__session.post(f"{self.__address}/api/v2/torrents/resume", data=resume_payload, cookies=self.__cookie)
             if response.status_code != 200: 
