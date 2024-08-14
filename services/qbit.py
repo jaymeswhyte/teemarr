@@ -23,7 +23,7 @@ class QBitManager:
         }
         response = self.__session.post(f"{self.__address}/api/v2/auth/login", data=login_payload)
         if response.status_code==200: 
-            self.__cookie = {"SID":response.cookies["SID"]}
+            #self.__cookie = {"SID":response.cookies["SID"]}
             logging.info(f"Connected to QBitTorrent @ {self.__address}")
             
         else: logging.warning(f"Failed to connect to QBitTorrent @ {self.__address}: {response.content.decode()}")
@@ -33,7 +33,7 @@ class QBitManager:
         try:
             self.qbit_login() #QBitTorrent seems to arbitrarily timeout issued tokens, so this is a bruteforce solution - validate every time a command is sent
             pause_payload = {'hashes':'all'}
-            response = self.__session.post(f"{self.__address}/api/v2/torrents/pause", data=pause_payload, cookies=self.__cookie)
+            response = self.__session.post(f"{self.__address}/api/v2/torrents/pause", data=pause_payload)
             if response.status_code != 200: 
                 logging.warning(f"Failed to pause torrents: {response.content.decode()}")
                 return False
@@ -45,7 +45,7 @@ class QBitManager:
         try:
             self.qbit_login() #QBitTorrent seems to arbitrarily timeout issued tokens, so this is a bruteforce solution - validate every time
             resume_payload = {'hashes':'all'}
-            response = self.__session.post(f"{self.__address}/api/v2/torrents/resume", data=resume_payload, cookies=self.__cookie)
+            response = self.__session.post(f"{self.__address}/api/v2/torrents/resume", data=resume_payload, cookies=self)
             if response.status_code != 200: 
                 logging.warning(f"Failed to resume torrents: {response.content}")
                 return False
