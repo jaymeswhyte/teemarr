@@ -12,6 +12,7 @@ import pytz
 
 # Environment variables
 load_dotenv()
+
 TOKEN = os.environ["TOKEN"]
 GUILD_ID = int(os.environ["GUILD_ID"])
 GUILD_OBJECT = discord.Object(id=GUILD_ID)
@@ -82,9 +83,10 @@ async def request(interaction: discord.Interaction, query:str):
             if count <= 9:
                 if searchResult._year != "": yearStr = f"({searchResult._year})"
                 else: yearStr = ""
+                description = searchResult._description
                 embed = discord.Embed(
                     title=f"{searchResult._title} {yearStr}",
-                    description=f"{searchResult._type}\n-# {searchResult._description}",
+                    description=f"{searchResult._type}\n-# {description}",
                     color=discord.Color.dark_grey()
                 )
                 embeds.append(embed)
