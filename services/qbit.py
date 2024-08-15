@@ -45,7 +45,7 @@ class QBitManager:
         try:
             self.qbit_login() #QBitTorrent seems to arbitrarily timeout issued tokens, so this is a bruteforce solution - validate every time
             resume_payload = {'hashes':'all'}
-            response = self.__session.post(f"{self.__address}/api/v2/torrents/resume", data=resume_payload, cookies=self)
+            response = self.__session.post(f"{self.__address}/api/v2/torrents/resume", data=resume_payload)
             if response.status_code != 200: 
                 logging.warning(f"Failed to resume torrents: {response.content}")
                 return False
