@@ -9,6 +9,7 @@ class RequestButton(discord.ui.Button):
         self.manager = manager
         if item._year != "": yearStr = f"({item._year})"
         else: yearStr = ""
+        if len(item._title) >= 74: item._title = item._title[0:70]+"..."
         super().__init__(label=f"{item._title} {yearStr}", style=discord.ButtonStyle.primary)
         self.item = item
 
