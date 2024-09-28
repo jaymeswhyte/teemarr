@@ -128,7 +128,7 @@ async def on_ready():
     if not statusChannel: statusChannel = guild.channels[0]
     embeds = []
     with open('version.txt', 'r') as file:
-        version = file.readline()
+        version = file.readline().strip()
         file.close()
     configuration = Config(configPath)
     if configuration.is_older_than(version):
