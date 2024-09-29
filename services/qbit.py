@@ -1,6 +1,7 @@
 import requests
 import logging
 from components.torrentListing import TorrentListing
+from typing import List
 
 class QBitManager:
     __username = ""
@@ -54,7 +55,7 @@ class QBitManager:
         except Exception as e:
             logging.error(f"Exception while resuming all torrents: {e}")
 
-    def info(self) -> list[TorrentListing]:
+    def info(self) -> List[TorrentListing]:
         try:
             self.qbit_login()
             info_payload = {'filter':'downloading'}
