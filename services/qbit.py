@@ -1,5 +1,6 @@
 import requests
 import logging
+from components.torrentListing import TorrentListing
 
 class QBitManager:
     __username = ""
@@ -52,3 +53,22 @@ class QBitManager:
             else: return True
         except Exception as e:
             logging.error(f"Exception while resuming all torrents: {e}")
+
+    def info(self) -> list[TorrentListing]:
+        try:
+            self.qbit_login()
+            info_payload = {'filter':'downloading'}
+            response = self.__session.post(f"{self.__address}/api/v2/torrents/info", data=info_payload)
+            if response.status_code!=200:
+                logging.warning(f"Failed to get torrent info: {response.content}")
+            else:
+                returnList = []
+                responseJson = response.json()
+                if(len(responseJson))>0:
+                    for torrent in responseJson:
+                        returnList.append(TorrentListing(torrent['name'], torrent['progress'], torrent['state'], torrent['num_seeds']))
+                return returnList
+                
+        except Exception as e:
+            logging.error(f"Exception while getting torrent info: {e}")
+
