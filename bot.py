@@ -6,6 +6,7 @@ import os
 from services import qbit, overseerr
 from ui import requestButton, cancelButton, requestView
 from components.config import Config
+from components.torrentListing import TorrentListing
 from utils.TeemoUtilities import *
 from dotenv import load_dotenv
 import pytz
@@ -69,6 +70,38 @@ async def resume(interaction: discord.Interaction):
         await interaction.response.send_message(":white_check_mark: Resumed all paused torrents.")
     else:
         await interaction.response.send_message(":x: Failed to resume torrents.") 
+
+@tree.command(name="torrentlist", description="List active torrents.", guild=GUILD_OBJECT)
+async def torrentlist(interaction: discord.Interaction):
+    global qbitManager
+    torrentList = qbitManager.info()
+    if len(torrentList)>0:
+        embed = discord.Embed(title=f"Active Torrents", color=discord.Color.dark_grey())
+        for torrentListing in torrentList:
+            torrentInfo = f""
+            stalled = False
+            paused = False
+            if torrentListing.state == "downloading": 
+                if torrentListing.seeds == 0: 
+                    torrentInfo+=":infinity: "
+                    stalled = True
+                else: torrentInfo+=":arrow_double_down: "
+            elif torrentListing.state == "paused": 
+                paused = True
+                torrentInfo+=":pause_button: "
+            torrentInfo+=f"{int(100*torrentListing.progress)}%"
+            roundedPercent = int(10*round(torrentListing.progress, 1))
+            torrentInfo+=":blue_square:"*roundedPercent
+            torrentInfo+=":white_large_square:"*(10-roundedPercent)
+            if stalled: stalledStr = " (Stalled)"
+            else: stalledStr = ""
+            if paused: pausedStr = " (Paused)"
+            else: pausedStr = ""
+            torrentInfo+=f" {torrentListing.seeds} Seeds{stalledStr}{pausedStr}."
+            embed.add_field(name=torrentListing.title, value=torrentInfo, inline=False)
+        await interaction.response.send_message(embed=embed)
+    else:
+        await interaction.response.send_message("There are no torrents currently downloading.")
 
 @tree.command(name="request", description="Request a Title.", guild=GUILD_OBJECT)
 async def request(interaction: discord.Interaction, query:str):
