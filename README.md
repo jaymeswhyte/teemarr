@@ -22,5 +22,38 @@ docker run -d \
 --restart unless-stopped \
 jaymeswhyte/teemarr:latest
 ```
+## Why Teemarr?
+Teemarr allows you and your friends to manage your media server stack remotely, without the use of any tunelling or VPN connection!
+
 ## Features & Commands
-_This section is still in construction._
+### Content Management
+#### `/request {title}`
+- Searches for the given title and returns a list of options as button embeds
+- Selected title is logged as a request with Overseerr
+- Ideally, Overseerr should be set to automatically accept requests
+
+### Torrent Management
+#### `/torrentlist`
+- Responds with a list of all active torrents, detailing title, status, seed count and progress
+#### `/pause`
+- Pause all active torrents (helpful for scenarios with limited bandwidth)
+#### `/resume`
+- Resume all active torrents
+
+### Bot Configuration and Debugging
+#### `/echo {msg}`
+- Echo the given message; Useful to verify server is online and bot is running
+#### `/overnights {setting}`
+- Configure overnight downloads with ON/OFF
+- All torrents will pause at 08:00 and resume at 01:00
+- Helpful for scenarios with limited bandwidth
+
+## Future Features (1.0 release)
+As this is a work in progress side project, not all planned features have yet been implemented. Some planned future features include:
+
+- Notifications for newly added titles
+- Pausing/Resuming of specific torrents
+- Season-specific series requests
+- Selectable quality profiles
+- Configurable overnight download times
+- ...Etc
