@@ -1,6 +1,7 @@
 from aiohttp import web
 import asyncio
 import logging
+import json
 
 class WebhookServer:
     __port = 0
@@ -12,11 +13,14 @@ class WebhookServer:
         self.runner = web.AppRunner(self.app)
 
     async def handle_webhook(self, request):
-        data = await request.json()
-        logging.info(f"Received webhook: {data}")
-        await self.queue.put(data)
-        print("put stuff")
-        return web.Response(text="OK")
+        try:
+            data = await request.post()
+            payload = json.loads(data['payload'])
+            logging.info(f"Received webhook: {data}")
+            await self.queue.put(payload)
+            return web.Response(text="OK")
+        except Exception as e:
+            logging.warning(f"Error parsing JSON data: {data}")
 
     async def start(self):
         await self.runner.setup()
