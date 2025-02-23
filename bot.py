@@ -3,7 +3,7 @@ from discord import app_commands
 from discord.ext import commands, tasks
 from datetime import datetime, time
 import os
-from services import qbit, overseerr, webhookserver
+from services import qbit, overseerr, webhookserver, dbmanager
 from ui import requestButton, cancelButton, requestView
 from components.config import Config
 from components.torrentListing import TorrentListing
@@ -55,6 +55,11 @@ configuration = None
 configPath = None
 if os.path.exists('/config'): configPath = '/config'
 else: configPath = 'config'
+
+databasePath = os.path.join(configPath, 'database')
+os.makedirs(databasePath, exist_ok=True) # Create subdirectory if it doesn't exist
+
+dbManager = dbmanager.DBManager(databasePath)
 
 # COMMANDS
 @tree.command( name="echo", description="Echo message", guild = GUILD_OBJECT)
@@ -113,7 +118,7 @@ async def torrentlist(interaction: discord.Interaction):
 
 @tree.command(name="request", description="Request a Title.", guild=GUILD_OBJECT)
 async def request(interaction: discord.Interaction, query:str):
-    global overseerrManager
+    global overseerrManager, dbManager
     searchResults = overseerrManager.search(query)
     view = requestView.RequestView(timeout=60)
     embeds = []
@@ -131,7 +136,7 @@ async def request(interaction: discord.Interaction, query:str):
                     color=discord.Color.dark_grey()
                 )
                 embeds.append(embed)
-                view.add_item(requestButton.RequestButton(searchResult, overseerrManager))
+                view.add_item(requestButton.RequestButton(searchResult, overseerrManager, dbManager))
         view.add_item(cancelButton.CancelButton())
         await interaction.response.send_message(embeds=embeds, view=view)
         view.message = await interaction.original_response()
