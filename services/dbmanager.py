@@ -19,7 +19,9 @@ class DBManager:
     def getRequest(self, id):
         Request = Query()
         result = self.__table.search(Request.id == id)
-        return result
+        if result:
+            return result[0]
+        return None
     
     def updateRequest(self, id, newvals:dict):
         Request = Query()

@@ -196,7 +196,7 @@ async def on_ready():
 
 @tasks.loop(minutes=5)
 async def check_webhooks():
-    global webhookServer
+    global webhookServer, dbManager
     while not webhookServer.queue.empty():
         try:
             payload = await webhookServer.queue.get()
@@ -210,7 +210,19 @@ async def check_webhooks():
                         description=f"-# {metadata['summary']}",
                         color=discord.Color.dark_grey()
                     )
-                await notificationChannel.send(f"New {mediaType} on {serverName}!", embeds=[embed])
+                tmdbID = None
+                requesterID = None
+                pingString = ""
+                for guid in metadata["Guid"]:
+                    if guid["id"].startswith("tmdb://"):
+                        tmdbID = int(guid["id"].split("tmdb://")[1])
+                        break
+                if tmdbID != None:
+                    requestRecord = dbManager.getRequest(tmdbID)
+                    if requestRecord != None: 
+                        requesterID = requestRecord['user']
+                        pingString = f"<@{requesterID}>"
+                await notificationChannel.send(f"New {mediaType} on {serverName}! {pingString}", embeds=[embed])
         except Exception as e:
             logging.error(f"Exception encountered whilst handling webhook: {e}")
             
