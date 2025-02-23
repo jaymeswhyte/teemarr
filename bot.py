@@ -3,13 +3,15 @@ from discord import app_commands
 from discord.ext import commands, tasks
 from datetime import datetime, time
 import os
-from services import qbit, overseerr
+from services import qbit, overseerr, webhookserver
 from ui import requestButton, cancelButton, requestView
 from components.config import Config
 from components.torrentListing import TorrentListing
 from utils.TeemoUtilities import *
 from dotenv import load_dotenv
 import pytz
+import logging
+import asyncio
 
 # Environment variables
 load_dotenv()
@@ -25,6 +27,11 @@ QBIT_ADDRESS= f"http://{os.environ['QBIT_ADDRESS']}:{os.environ['QBIT_PORT']}"
 OVERSEERR_KEY = os.environ["OVERSEERR_KEY"]
 OVERSEERR_ADDRESS = f"http://{os.environ['OVERSEERR_ADDRESS']}:{os.environ['OVERSEERR_PORT']}"
 
+WEBHOOK_PORT = os.environ["WEBHOOK_PORT"]
+
+STATUS_CHANNEL_NAME = os.environ["STATUS_CHANNEL"]
+NOTIFICATION_CHANNEL_NAME = os.environ["NOTIFICATION_CHANNEL"]
+
 TZ_NAME = os.environ['TZ']
 if not TZ_NAME:
     TZ_NAME = 'UTC'
@@ -36,13 +43,14 @@ dayTime = time(hour=9, minute=0, tzinfo=local_tz)
 client = discord.Client(intents=discord.Intents.default())
 tree = app_commands.CommandTree(client)
 
-qbitManager=None
+qbitManager = None
 overseerrManager = None
+webhookServer = webhookserver.WebhookServer(WEBHOOK_PORT)
 
 guild = None
 statusChannel = None
+notificationChannel = None
 configuration = None
-
 
 configPath = None
 if os.path.exists('/config'): configPath = '/config'
@@ -150,14 +158,15 @@ async def overnights(interaction: discord.Interaction, setting:str):
 # CLIENT EVENTS
 @client.event
 async def on_ready():
-    global qbitManager, overseerrManager, statusChannel, configuration, guild
+    global qbitManager, overseerrManager, statusChannel, notificationChannel, configuration, guild, webhookServer
     guild = await client.fetch_guild(GUILD_ID)
     await tree.sync(guild=guild)
     channels = await guild.fetch_channels()
     print("Connected to discord")
     qbitManager = qbit.QBitManager(QBIT_ADDRESS, QBIT_USER, QBIT_PASS)
     overseerrManager = overseerr.OverseerrManager(OVERSEERR_ADDRESS, OVERSEERR_KEY)
-    statusChannel = discord.utils.get(channels, name="status")
+    statusChannel = discord.utils.get(channels, name=STATUS_CHANNEL_NAME)
+    notificationChannel = discord.utils.get(channels, name=NOTIFICATION_CHANNEL_NAME)
     if not statusChannel: statusChannel = guild.channels[0]
     embeds = []
     with open('version.txt', 'r') as file:
@@ -178,7 +187,28 @@ async def on_ready():
     print(f"TZ: {timezone}\tTime:{datetime.now(timezone)}\tNight:{nightTime}")
     overnight_resume.start()
     daytime_pause.start()
+    check_webhooks.start()
 
+@tasks.loop(seconds=5)
+async def check_webhooks():
+    global webhookServer
+    while not webhookServer.queue.empty():
+        try:
+            payload = await webhookServer.queue.get()
+            event = payload['event']
+            serverName = payload['Server']['title']
+            metadata = payload['Metadata']
+            mediaType = metadata['type']
+            if event == "library.on.deck":
+                embed = discord.Embed(
+                        title=f"{metadata['title']}",
+                        description=f"-# {metadata['summary']}",
+                        color=discord.Color.dark_grey()
+                    )
+                await notificationChannel.send(f"New {mediaType} on {serverName}!", embeds=[embed])
+        except Exception as e:
+            logging.error(f"Exception encountered whilst handling webhook: {e}")
+            
 
 @tasks.loop(time=nightTime)
 async def overnight_resume():
@@ -200,4 +230,11 @@ async def daytime_pause():
         else:
             await statusChannel.send(f"Good Morning! I couldn't pause downloads for the day.")
 
-client.run(TOKEN)
+async def main():
+    # Start the webhook server in the background
+    asyncio.create_task(webhookServer.start())
+
+    # Start the Discord bot (it will block the execution)
+    await client.start(TOKEN)
+
+asyncio.run(main())  # Keep this here, as `main()` properly manages the event loop now.
