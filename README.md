@@ -29,7 +29,7 @@ jaymeswhyte/teemarr:latest
 ## Why Teemarr?
 Teemarr allows you and your friends to manage your media server stack remotely, without the use of any tunelling or VPN connection!
 
-## Features & Commands
+## Commands & Features 
 ### Content Management
 #### `/request {title}`
 - Searches for the given title and returns a list of options as button embeds
