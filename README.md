@@ -18,6 +18,10 @@ docker run -d \
 -e OVERSEERR_KEY={OVERSEERR_KEY} \
 -e OVERSEERR_ADDRESS={OVERSEER_IP} \
 -e OVERSEERR_PORT=5055 \
+-e NOTIFICATIONS_CHANNEL=notifications
+-e STATUS_CHANNEL=status
+-e WEBHOOK_PORT=5000
+-p 5000:5000
 -v {PATH_TO_CONFIG}:/config \
 --restart unless-stopped \
 jaymeswhyte/teemarr:latest
@@ -48,10 +52,14 @@ Teemarr allows you and your friends to manage your media server stack remotely, 
 - All torrents will pause at 08:00 and resume at 01:00
 - Helpful for scenarios with limited bandwidth
 
+### New Title Notifications
+- Plex webhooks can be set to notify Teemarr of new titles
+- Teemarr listens on port 5000 (by default) at the endpoint `/webhook`
+
 ## Future Features (1.0 release)
 As this is a work in progress side project, not all planned features have yet been implemented. Some planned future features include:
 
-- Notifications for newly added titles
+- User-specific notifications for newly added requested titles
 - Pausing/Resuming of specific torrents
 - Season-specific series requests
 - Selectable quality profiles
