@@ -1,7 +1,7 @@
 # Teemarr (WIP)
 *A self-hosted, containerised discord bot to help manage your Plex media server.*
 ## Installation
-_DockerHub_ page [here](https://hub.docker.com/r/jaymeswhyte/teemarr).
+_DockerHub_ repo [here](https://hub.docker.com/r/jaymeswhyte/teemarr).
 Use the following command:
 ```
 docker run -d \
