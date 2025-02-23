@@ -18,10 +18,10 @@ docker run -d \
 -e OVERSEERR_KEY={OVERSEERR_KEY} \
 -e OVERSEERR_ADDRESS={OVERSEER_IP} \
 -e OVERSEERR_PORT=5055 \
--e NOTIFICATIONS_CHANNEL=notifications
--e STATUS_CHANNEL=status
--e WEBHOOK_PORT=5000
--p 5000:5000
+-e NOTIFICATIONS_CHANNEL=notifications \
+-e STATUS_CHANNEL=status \
+-e WEBHOOK_PORT=5000 \
+-p 5000:5000 \
 -v {PATH_TO_CONFIG}:/config \
 --restart unless-stopped \
 jaymeswhyte/teemarr:latest
