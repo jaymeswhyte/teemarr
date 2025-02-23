@@ -196,10 +196,10 @@ async def check_webhooks():
         try:
             payload = await webhookServer.queue.get()
             event = payload['event']
-            serverName = payload['Server']['title']
-            metadata = payload['Metadata']
-            mediaType = metadata['type']
-            if event == "library.on.deck":
+            if event == "library.on.deck" or event=="library.new":
+                serverName = payload['Server']['title']
+                metadata = payload['Metadata']
+                mediaType = metadata['type']
                 embed = discord.Embed(
                         title=f"{metadata['title']}",
                         description=f"-# {metadata['summary']}",
