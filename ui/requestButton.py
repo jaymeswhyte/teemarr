@@ -25,7 +25,7 @@ async def handle_request(interaction: discord.Interaction, item: SearchResult, m
     else: yearStr = ""
     if requestResult:
         titleData = item.rawData
-        await dbmanager.insertRequest(titleData['id'], interaction.user.id, datetime.now().strftime("%m/%d/%Y, %H:%M:%S"))
+        dbmanager.insertRequest(titleData['id'], interaction.user.id, datetime.now().strftime("%m/%d/%Y, %H:%M:%S"))
         await interaction.message.delete()
         await interaction.response.send_message(f"Requested: {item._title}{yearStr}.")
     else:
