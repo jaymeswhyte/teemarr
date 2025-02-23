@@ -189,7 +189,7 @@ async def on_ready():
     daytime_pause.start()
     check_webhooks.start()
 
-@tasks.loop(seconds=5)
+@tasks.loop(minutes=5)
 async def check_webhooks():
     global webhookServer
     while not webhookServer.queue.empty():
