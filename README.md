@@ -2,7 +2,7 @@
 *A self-hosted, containerised discord bot to help manage your Plex media server.*
 ## Installation
 _DockerHub_ repo [here](https://hub.docker.com/r/jaymeswhyte/teemarr).
-Use the following command:
+Use the following command after creating a new application on [discord.dev](https://discord.com/developers/applications):
 ```
 docker run -d \
 --name=teemarr \
