@@ -2,6 +2,8 @@
 *A self-hosted, containerised discord bot to help manage your Plex media server.*
 ## Installation
 _DockerHub_ repo [here](https://hub.docker.com/r/jaymeswhyte/teemarr).
+This bot is currently built for use with QBitTorrent and Overseerr. Most bot features will work with both Plex and Jellyfin (as the bot needn't interact directly with the media server), but webhook support for new titles is built for Plex; this may change in the future.
+
 Use the following command after creating a new application on [discord.dev](https://discord.com/developers/applications):
 ```
 docker run -d \
