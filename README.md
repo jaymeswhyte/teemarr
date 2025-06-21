@@ -1,8 +1,10 @@
 # Teemarr (WIP)
 *A self-hosted, containerised discord bot to help manage your Plex media server.*
 ## Installation
-_DockerHub_ page [here](https://hub.docker.com/r/jaymeswhyte/teemarr).
-Use the following command:
+_DockerHub_ repo [here](https://hub.docker.com/r/jaymeswhyte/teemarr).
+This bot is currently built for use with QBitTorrent and Overseerr. Most bot features will work with both Plex and Jellyfin (as the bot needn't interact directly with the media server), but webhook support for new titles is built for Plex; this may change in the future.
+
+Use the following command after creating a new application on [discord.dev](https://discord.com/developers/applications):
 ```
 docker run -d \
 --name=teemarr \
@@ -35,6 +37,7 @@ Teemarr allows you and your friends to manage your media server stack remotely, 
 - Searches for the given title and returns a list of options as button embeds
 - Selected title is logged as a request with Overseerr
 - Ideally, Overseerr should be set to automatically accept requests
+- Requests stored in a local TinyDB database
 
 ### Torrent Management
 #### `/torrentlist`
@@ -55,11 +58,11 @@ Teemarr allows you and your friends to manage your media server stack remotely, 
 ### New Title Notifications
 - Plex webhooks can be set to notify Teemarr of new titles
 - Teemarr listens on port 5000 (by default) at the endpoint `/webhook`
+- If the new title was requested via Teemarr, the user who requested it will be pinged
 
 ## Future Features (1.0 release)
 As this is a work in progress side project, not all planned features have yet been implemented. Some planned future features include:
 
-- User-specific notifications for newly added requested titles
 - Pausing/Resuming of specific torrents
 - Season-specific series requests
 - Selectable quality profiles
