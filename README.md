@@ -29,7 +29,7 @@ docker run -d \
 jaymeswhyte/teemarr:latest
 ```
 ## Why Teemarr?
-Teemarr allows you and your friends to manage your media server stack remotely, without the use of any tunelling or VPN connection!
+Teemarr allows you and your friends to manage your media server stack remotely, without the use of any tunnelling or VPN connection!
 
 ## Commands & Features 
 ### Content Management
