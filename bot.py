@@ -222,7 +222,9 @@ async def check_webhooks():
                     if requestRecord != None: 
                         requesterID = requestRecord['user']
                         pingString = f"<@{requesterID}>"
-                await notificationChannel.send(f"New {mediaType} on {serverName}! {pingString}", embeds=[embed])
+                    episodeStr = ""
+                    if mediaType == "episode": episodeStr = f"{metadata['title'] }"
+                await notificationChannel.send(f"New {episodeStr}{mediaType} on {serverName}! {pingString}", embeds=[embed])
         except Exception as e:
             logging.error(f"Exception encountered whilst handling webhook: {e}")
             
