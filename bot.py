@@ -205,11 +205,6 @@ async def check_webhooks():
                 serverName = payload['Server']['title']
                 metadata = payload['Metadata']
                 mediaType = metadata['type']
-                embed = discord.Embed(
-                        title=f"{metadata['title']}",
-                        description=f"-# {metadata['summary']}",
-                        color=discord.Color.dark_grey()
-                    )
                 tmdbID = None
                 requesterID = None
                 pingString = ""
@@ -217,14 +212,24 @@ async def check_webhooks():
                     if guid["id"].startswith("tmdb://"):
                         tmdbID = int(guid["id"].split("tmdb://")[1])
                         break
+                descriptionStr = f"-# {metadata['summary']}"
+                titleStr = f"{metadata['title']}"
                 if tmdbID != None:
                     requestRecord = dbManager.getRequest(tmdbID)
                     if requestRecord != None: 
                         requesterID = requestRecord['user']
                         pingString = f"<@{requesterID}>"
-                    episodeStr = ""
-                    if mediaType == "episode": episodeStr = f"{metadata['title'] }"
-                await notificationChannel.send(f"New {episodeStr}{mediaType} on {serverName}! {pingString}", embeds=[embed])
+                    showStr = ""
+                    if mediaType == "episode": 
+                        showStr = f"**{metadata['grandparentTitle']}** "
+                        titleStr = f"{metadata['parentTitle']} Episode {metadata['index']} - {metadata['title']}"
+                        descriptionStr = f"-# ||{metadata['summary']}||"
+                embed = discord.Embed(
+                        title=titleStr,
+                        description=descriptionStr,
+                        color=discord.Color.dark_grey()
+                    )
+                await notificationChannel.send(f"New {showStr}{mediaType} on {serverName}! {pingString}", embeds=[embed])
         except Exception as e:
             logging.error(f"Exception encountered whilst handling webhook: {e}")
             

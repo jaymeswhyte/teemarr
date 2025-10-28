@@ -27,6 +27,6 @@ async def handle_request(interaction: discord.Interaction, item: SearchResult, m
         titleData = item.rawData
         dbmanager.insertRequest(titleData['id'], interaction.user.id, datetime.now().strftime("%m/%d/%Y, %H:%M:%S"))
         await interaction.message.delete()
-        await interaction.response.send_message(f"@{interaction.user.id} requested: {item._title}{yearStr}.")
+        await interaction.response.send_message(f"<@{interaction.user.id}> requested: {item._title}{yearStr}.")
     else:
-        await interaction.response.send_message(f"@{interaction.user.id} failed to request {item._title}{yearStr}.")
+        await interaction.response.send_message(f"<@{interaction.user.id}> failed to request {item._title}{yearStr}.")
